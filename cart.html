@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VOID — Your Bag</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --void: #000000;
+      --abyss: #050508;
+      --deep: #0a0a12;
+      --surface: #0f0f1a;
+      --mist: #1a1a2e;
+      --border: rgba(123,94,167,0.18);
+      --border-bright: rgba(212,167,255,0.35);
+      --glow: #7b5ea7;
+      --glow-bright: #a87fd4;
+      --glow-hot: #d4a7ff;
+      --accent: #ff6b9d;
+      --gold: #c9a84c;
+      --green: #4dffb0;
+      --text: #d8d0e8;
+      --text-dim: #7a7090;
+      --text-faint: #3a3550;
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+
+    body {
+      background: var(--void);
+      color: var(--text);
+      font-family: 'Cormorant Garamond', serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Noise */
+    body::before {
+      content:'';
+      position:fixed; inset:0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events:none; z-index:9998; opacity:0.35;
+    }
+
+    /* Ambient BG */
+    body::after {
+      content:'';
+      position:fixed; inset:0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 30%, rgba(123,94,167,0.07) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 80% 70%, rgba(255,107,157,0.04) 0%, transparent 60%);
+      pointer-events:none; z-index:0;
+    }
+
+    /* ── CURSOR ── */
+    .cursor { width:10px; height:10px; background:var(--glow-hot); border-radius:50%; position:fixed; top:0; left:0; pointer-events:none; z-index:10000; mix-blend-mode:screen; }
+    .cursor-ring { width:32px; height:32px; border:1px solid var(--glow); border-radius:50%; position:fixed; top:0; left:0; pointer-events:none; z-index:9999; mix-blend-mode:screen; transition:width 0.3s, height 0.3s; }
+
+    /* ── NAV ── */
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:1000;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:1.5rem 4rem;
+      border-bottom:1px solid var(--border);
+      background:linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 100%);
+      backdrop-filter:blur(8px);
+    }
+    .nav-logo {
+      font-family:'Cinzel Decorative', serif; font-size:1.4rem;
+      letter-spacing:0.3em; color:var(--glow-hot);
+      text-decoration:none;
+      text-shadow:0 0 30px rgba(212,167,255,0.5);
+      animation:logoBreath 4s ease-in-out infinite;
+    }
+    @keyframes logoBreath {
+      0%,100% { text-shadow:0 0 20px rgba(212,167,255,0.5); }
+      50% { text-shadow:0 0 50px rgba(212,167,255,0.9), 0 0 100px rgba(123,94,167,0.4); }
+    }
+    .nav-right { display:flex; align-items:center; gap:2.5rem; }
+    .nav-right a {
+      font-family:'Share Tech Mono', monospace; font-size:0.72rem;
+      letter-spacing:0.2em; text-transform:uppercase;
+      color:var(--text-dim); text-decoration:none;
+      transition:color 0.3s;
+    }
+    .nav-right a:hover { color:var(--glow-hot); }
+    .nav-right a.active { color:var(--glow-hot); }
+
+    /* ── PAGE WRAPPER ── */
+    .page {
+      max-width:1300px; margin:0 auto;
+      padding:8rem 4rem 6rem;
+      position:relative; z-index:1;
+    }
+
+    /* ── BREADCRUMB ── */
+    .breadcrumb {
+      display:flex; align-items:center; gap:0.8rem;
+      font-family:'Share Tech Mono', monospace;
+      font-size:0.62rem; letter-spacing:0.2em; text-transform:uppercase;
+      color:var(--text-faint); margin-bottom:3rem;
+      animation:fadeUp 0.6s 0.1s both;
+    }
+    .breadcrumb a { color:var(--text-faint); text-decoration:none; transition:color 0.3s; }
+    .breadcrumb a:hover { color:var(--glow-hot); }
+    .breadcrumb span { color:var(--glow); }
+
+    /* ── PAGE TITLE ── */
+    .page-header {
+      margin-bottom:3.5rem;
+      animation:fadeUp 0.6s 0.2s both;
+    }
+    .page-header h1 {
+      font-family:'Cinzel Decorative', serif;
+      font-size:clamp(2rem, 4vw, 3.5rem);
+      font-weight:700;
+      background:linear-gradient(135deg, #fff 0%, var(--glow-hot) 50%, var(--glow) 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      background-clip:text;
+      margin-bottom:0.5rem;
+    }
+    .page-header p {
+      font-family:'Share Tech Mono', monospace;
+      font-size:0.65rem; letter-spacing:0.3em; color:var(--text-dim);
+    }
+
+    /* ── PROGRESS STEPS ── */
+    .steps {
+      display:flex; align-items:center; gap:0; margin-bottom:4rem;
+      animation:fadeUp 0.6s 0.3s both;
+    }
+    .step {
+      display:flex; align-items:center; gap:0.8rem;
+      font-family:'Share Tech Mono', monospace;
+      font-size:0.62rem; letter-spacing:0.15em; text-transform:uppercase;
+    }
+    .step-num {
+      width:28px; height:28px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:0.65rem; font-weight:700;
+      transition:all 0.3s;
+    }
+    .step.active .step-num {
+      background:var(--glow-hot); color:var(--void);
+      box-shadow:0 0 20px rgba(212,167,255,0.5);
+    }
+    .step.done .step-num {
+      background:rgba(212,167,255,0.15);
+      border:1px solid var(--glow); color:var(--glow-hot);
+    }
+    .step.pending .step-num {
+      background:transparent;
+      border:1px solid var(--text-faint); color:var(--text-faint);
+    }
+    .step.active .step-label { color:var(--glow-hot); }
+    .step.done .step-label { color:var(--glow); }
+    .step.pending .step-label { color:var(--text-faint); }
+    .step-connector {
+      flex:1; height:1px; min-width:40px;
+      background:linear-gradient(to right, var(--border-bright), var(--border));
+      margin:0 0.5rem;
+    }
+
+    /* ── MAIN LAYOUT ── */
+    .cart-layout {
+      display:grid; grid-template-columns:1fr 380px; gap:3rem;
+      align-items:start;
+    }
+
+    /* ── LEFT COLUMN ── */
+
+    /* Promo banner */
+    .promo-banner {
+      display:flex; align-items:center; gap:1rem;
+      padding:0.9rem 1.2rem;
+      background:rgba(77,255,176,0.04);
+      border:1px solid rgba(77,255,176,0.2);
+      margin-bottom:2rem;
+      animation:fadeUp 0.6s 0.4s both;
+    }
+    .promo-icon { color:var(--green); font-size:0.9rem; flex-shrink:0; }
+    .promo-text {
+      font-family:'Share Tech Mono', monospace;
+      font-size:0.65rem; letter-spacing:0.15em; color:var(--green);
+    }
+    .promo-text strong { color:var(--green); }
+
+    /* Section labels */
+    .col-header {
+      font-family:'Share Tech Mono', monospace;
+      font-size:0.62rem; letter-spacing:0.3em; text-transform:uppercase;
+      color:var(--glow); margin-bottom:1.2rem;
+      padding-bottom:0.8rem;
+      border-bottom:1px solid var(--border);
+    }
+
+    /* ── CART ITEMS ── */
+    .cart-items { animation:fadeUp 0.6s 0.5s both; }
+
+    .cart-item {
+      display:grid; grid-template-columns:80px 1fr auto;
+      gap:1.5rem; align-items:start;
+      padding:1.5rem 0;
+      border-bottom:1px solid var(--border);
+      position:relative;
+      transition:background 0.3s;
+    }
+    .cart-item:last-child { border-bottom:none; }
+    .cart-item:hover { background:rgba(123,94,167,0.03); }
+
+    .item-thumb {
+      width:80px; height:80px;
+      background:var(--deep);
+      border:1px solid var(--border);
+      display:flex; align-items:center; justify-content:center;
+      font-size:2rem;
+      position:relative; overflow:hidden;
+      flex-shrink:0;
+    }
+    .item-thumb::after {
+      content:''; position:absolute; inset:0;
+      background:radial-gradient(ellipse 80% 80% at 50% 50%, rgba(123,94,167,0.08), transparent);
+    }
+
+    .item-details {}
+    .item-category {
+      font-family:'Share Tech Mono', monospace;
+      font-size:0.58rem; letter-spacing:0.2em; text-transform:uppercase;
+      color:var(--glow); margin-bottom:0.3rem;
+    }
+    .item-name {
+      font-family:'Cormorant Garamond', serif;
+      font-size:1.05rem; font-weight:500; color:var(--text);
+      margin-bottom:0.5rem; line-height:1.3;
+    }
+    .item-meta {
+      display:flex; gap:1.5rem; flex-wrap:wrap;
+    }
+    .item-meta-tag {
+      font-family:'Share Tech Mono', monospace;
+      font-size:0.58rem; letter-spacing:0.15em; text-transform:uppercase;
+      color:var(--text-faint);
+      display:flex; align-items:center; gap:0.4rem;
+    }
+    .item-meta-tag span { color:var(--text-dim); }
+
+    .item-actions {
+      display:flex; gap:0.5rem; margin-top:0.8rem; align-items:center;
+    }
+    .item-action-btn {
+      font-family:'Share Tech Mono', monospace;
+      font-size:0.58rem; letter-spacing:0.15em; text-transform:uppercase;
+      background:none; border:none; color:var(--text-faint);
+      cursor:none; transition:color 0.3s; padding:0;
+    }
+    .item-action-btn:hover { color:var(--accent); }
+    .item-action-sep { color:var(--text-faint); font-size:0.5rem; }
+
+    .item-right {
+      display:flex; flex-direction:column;
+      align-items:flex-end; gap:1rem;
+      flex-shrink:0;
+    }
+    .item-price {
+      font-family:'Share Tech Mono', monospace;
+      font-size:1rem; color:var(--glow-hot);
+      white-space:nowrap;
+    }
+    .item-price-each {
+      font-family:'Share Tech Mono', monospace;
+      font-size:0.6rem; color:var(--text-faint);
+      white-space:nowrap;
+    }
+
+    /* Qty controls */
+    .qty-control {
+      display:flex; align-items:center;
+      border:1px solid var(--border);
+      background:var(--deep);
+    }
+    .qty-btn {
+      width:28px; height:28px;
+      background:none; border:none; color:var(--text-dim);
+      cursor:none; font-size:0.9rem;
+      transition:color 0.2s, background 0.2s;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .qty-btn:hover { color:var(--glow-hot); background:rgba(212,167,255,0.07); }
+    .qty-val {
+      width:32px; height:28px;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Share Tech Mono', monospace; font-size:0.75rem;
+      color:var(--text);
+      border-left:1px solid var(--border); border-right:1px solid var(--border);
+    }
+
+    /* Remove btn */
+    .item-remove {
+      background:none; border:none; color:var(--text-faint);
+      cursor:none; font-size:0.8rem;
+      transition:color 0.3s, transform 0.2s;
+    }
+    .item-remove:hover { color:var(--accent); transform:scale(1.2); }
+
+    /* ── PROMO CODE ── */
+    .promo-section {
+      margin-top:2rem;
+      animation:fadeUp 0.6s 0.6s both;
+    }
+    .promo-form {
+      display:flex; gap:0.8rem; margin-top:1rem;
+    }
+    .promo-input {
+      flex:1;
+      background:var(--deep); border:1px solid var(--border);
+      color:var(--text); padding:0.8rem 1rem;
+      font-family:'Share Tech Mono', monospace; font-size:0.72rem;
+      letter-spacing:0.15em; text-transform:uppercase;
+      outline:none; transition:border-color 0.3s;
+    }
+    .promo-input::placeholder { color:var(--text-faint); }
+    .promo-input:focus { border-color:var(--glow); }
+    .promo-apply {
+      font-family:'Share Tech Mono', monospace;
+      font-size:0.68rem; letter-spacing:0.2em; text-transform:uppercase;
+      color:var(--void); background:var(--glow-hot);
+      border:none; padding:0.8rem 1.5rem; cursor:none;
+      transition:opacity 0.3s, box-shadow 0.3s;
+      clip-path:polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+    }
+    .promo-apply:hover { opacity:0.85; box-shadow:0 0 20px rgba(212,167,255,0.3); }
+    .promo-success {
+      display:none; margin-top:0.8rem;
+      font-family:'Share Tech Mono', monospace;
+      font-size:0.62rem; letter-spacing:0.15em; color:var(--green);
+    }
+    .promo-success.show { display:flex; align-items:center; gap:0.5rem; }
+
+    /* ── CONTINUE SHOPPING ── */
+    .continue-btn {
+      display:inline-flex; align-items:center; gap:0.6rem;
+      font-family:'Share Tech Mono', monospace;
+      font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase;
+      color:var(--text-dim); text-decoration:none;
+      margin-top:2rem; transition:color 0.3s;
+      animation:fadeUp 0.6s 0.7s both;
+    }
+    .continue-btn:hover { color:var(--glow-hot); }
+    .continue-btn::before { content:'←'; transition:transform 0.3s; }
+    .continue-btn:hover::before { transform:translateX(-4px); }
+
+    /* ── RIGHT COLUMN — ORDER SUMMARY ── */
+    .order-summary {
+      position:sticky; top:7rem;
+      animation:fadeUp 0.6s 0.5s both;
+    }
+
+    .summary-box {
+      background:var(--abyss);
+      border:1px solid var(--border);
+      padding:2rem;
+      position:relative; overflow:hidden;
+    }
+    .summary-box::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(to right, transparent, var(--glow), transparent);
+    }
+
+    .summary-title {
+      font-family:'Cinzel Decorative', serif;
+      font-size:1rem; letter-spacing:0.1em; color:white;
+      margin-bottom:1.8rem;
+    }
+
+    .summary-line {
+      display:flex; justify-content:space-between; align-items:baseline;
+      margin-bottom:0.9rem;
+    }
+    .summary-label {
+      font-family:'Share Tech Mono', monospace;
+      font-size:0.65rem; letter-spacing:0.15em; text-transform:uppercase;
+      color:var(--text-dim);
+    }
+    .summary-val {
+      font-family:'Share Tech Mono', monospace;
+      font-size:0.75rem; color:var(--text);
+    }
+    .summary-val.green { color:var(--green); }
+    .summary-val.strike { text-decoration:line-through; color:var(--text-faint); font-size:0.65rem; }
+
+    .summary-divider {
+      height:1px; background:var(--border); margin:1.5rem 0;
+    }
+
+    .summary-total {
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:2rem;
+    }
+    .summary-total-label {
+      font-family:'Cinzel Decorative', serif; font-size:0.85rem; color:var(--text);
+    }
+    .summary-total-val {
+      font-family:'Share Tech Mono', monospace; font-size:1.3rem;
+      color:var(--glow-hot);
+      text-shadow:0 0 20px rgba(212,167,255,0.3);
+    }
+
+    /* Checkout button */
+    .checkout-btn {
+      width:100%; padding:1.1rem;
+      font-family:'Share Tech Mono', monospace;
+      font-size:0.72rem; letter-spacing:0.2em; text-transform:uppercase;
+      color:var(--void);
+      background:linear-gradient(135deg, var(--glow-hot) 0%, var(--glow) 100%);
+      border:none; cursor:none; position:relative; overflow:hidden;
+      transition:opacity 0.3s, box-shadow 0.3s;
+      clip-path:polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    }
+    .checkout-btn::after {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+      opacity:0; transition:opacity 0.3s;
+    }
+    .checkout-btn:hover { box-shadow:0 8px 40px rgba(212,167,255,0.4); }
+    .checkout-btn:hover::after { opacity:1; }
+    .checkout-btn .btn-arrow { margin-left:0.8rem; transition:transform 0.3s; display:inline-block; }
+    .checkout-btn:hover .btn-arrow { transform:translateX(4px); }
+
+    /* Trust badges */
+    .trust-row {
+      display:flex; justify-content:center; gap:1.5rem; margin-top:1.2rem;
+    }
+    .trust-badge {
+      display:flex; flex-direction:column; align-items:center; gap:0.3rem;
+      font-family:'Share Tech Mono', monospace;
+      font-size:0.55rem; letter-spacing:0.1em; text-transform:uppercase;
+      color:var(--text-faint);
+    }
+    .trust-badge span { font-size:1rem; opacity:0.5; }
+
+    /* Savings pill */
+    .savings-pill {
+      display:inline-flex; align-items:center; gap:0.5rem;
+      padding:0.4rem 0.9rem;
+      background:rgba(77,255,176,0.06);
+      border:1px solid rgba(77,255,176,0.2);
+      font-family:'Share Tech Mono', monospace;
+      font-size:0.6rem; letter-spacing:0.15em; color:var(--green);
+      margin-bottom:1.5rem;
+    }
+
+    /* ── ALSO RECOMMEND ── */
+    .recommendations {
+      margin-top:3rem; animation:fadeUp 0.6s 0.8s both;
+    }
+    .rec-grid {
+      display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem;
+      margin-top:1.2rem;
+    }
+    .rec-card {
+      background:var(--surface);
+      border:1px solid var(--border);
+      padding:1rem; cursor:none;
+      transition:border-color 0.3s, transform 0.3s;
+      text-align:center;
+    }
+    .rec-card:hover { border-color:var(--border-bright); transform:translateY(-3px); }
+    .rec-icon { font-size:1.8rem; margin-bottom:0.5rem; }
+    .rec-name {
+      font-size:0.8rem; font-style:italic;
+      color:var(--text-dim); margin-bottom:0.4rem; line-height:1.3;
+    }
+    .rec-price {
+      font-family:'Share Tech Mono', monospace;
+      font-size:0.65rem; color:var(--glow-hot);
+    }
+    .rec-add {
+      width:100%; margin-top:0.7rem; padding:0.5rem;
+      font-family:'Share Tech Mono', monospace;
+      font-size:0.55rem; letter-spacing:0.1em; text-transform:uppercase;
+      background:none; border:1px solid var(--border); color:var(--text-dim);
+      cursor:none; transition:border-color 0.3s, color 0.3s;
+    }
+    .rec-add:hover { border-color:var(--glow); color:var(--glow-hot); }
+
+    /* ── EMPTY STATE ── */
+    .empty-cart {
+      text-align:center; padding:6rem 2rem;
+      display:none; animation:fadeUp 0.6s both;
+    }
+    .empty-cart.show { display:block; }
+    .empty-glyph {
+      font-size:5rem; opacity:0.15;
+      margin-bottom:2rem;
+      animation:float 4s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%,100% { transform:translateY(0); }
+      50% { transform:translateY(-12px); }
+    }
+    .empty-title {
+      font-family:'Cinzel Decorative', serif;
+      font-size:1.5rem; color:var(--text-dim); margin-bottom:0.8rem;
+    }
+    .empty-sub { font-style:italic; color:var(--text-faint); margin-bottom:2rem; }
+
+    /* ── NOTIFICATION ── */
+    .notification {
+      position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(100px);
+      background:var(--surface); border:1px solid rgba(212,167,255,0.3);
+      color:var(--glow-hot); font-family:'Share Tech Mono', monospace;
+      font-size:0.68rem; letter-spacing:0.2em;
+      padding:0.9rem 2rem; z-index:5000;
+      transition:transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
+      text-transform:uppercase; white-space:nowrap;
+    }
+    .notification.show { transform:translateX(-50%) translateY(0); }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(20px); }
+      to { opacity:1; transform:translateY(0); }
+    }
+
+    @media (max-width:960px) {
+      nav { padding:1.5rem 2rem; }
+      .page { padding:7rem 2rem 4rem; }
+      .cart-layout { grid-template-columns:1fr; }
+      .order-summary { position:static; }
+      .rec-grid { grid-template-columns:repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+  <div class="notification" id="notification"></div>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">VOID</a>
+    <div class="nav-right">
+      <a href="index.html">Shop</a>
+      <a href="#">Collections</a>
+      <a href="cart.html" class="active">Bag (3)</a>
+    </div>
+  </nav>
+
+  <div class="page">
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+      <a href="index.html">Void</a>
+      <span>›</span>
+      <a href="#">Shop</a>
+      <span>›</span>
+      Your Bag
+    </div>
+
+    <!-- Header -->
+    <div class="page-header">
+      <h1>Your Bag</h1>
+      <p id="itemCountLabel">3 artifacts awaiting retrieval</p>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="steps">
+      <div class="step active">
+        <div class="step-num">1</div>
+        <div class="step-label">Bag</div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step pending">
+        <div class="step-num">2</div>
+        <div class="step-label">Passage</div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step pending">
+        <div class="step-num">3</div>
+        <div class="step-label">Offering</div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step pending">
+        <div class="step-num">4</div>
+        <div class="step-label">Seal</div>
+      </div>
+    </div>
+
+    <!-- Main layout -->
+    <div class="cart-layout" id="cartLayout">
+
+      <!-- LEFT: Items -->
+      <div class="cart-left">
+
+        <!-- Promo -->
+        <div class="promo-banner">
+          <div class="promo-icon">✦</div>
+          <div class="promo-text">Add <strong id="promoAmountLeft">$88.00</strong> more to unlock free shipping across the veil</div>
+        </div>
+
+        <div class="col-header">Items in your bag</div>
+
+        <div class="cart-items" id="cartItems"></div>
+
+        <!-- Promo Code -->
+        <div class="promo-section">
+          <div class="col-header">Ritual Code</div>
+          <div class="promo-form">
+            <input type="text" class="promo-input" id="promoInput" placeholder="Enter your sigil..."/>
+            <button class="promo-apply" onclick="applyPromo()">Apply</button>
+          </div>
+          <div class="promo-success" id="promoSuccess">
+            <span>✦</span> ECLIPSE20 applied — 20% off your order
+          </div>
+        </div>
+
+        <!-- Continue -->
+        <a href="index.html" class="continue-btn">Continue into the Void</a>
+      </div>
+
+      <!-- RIGHT: Summary -->
+      <div class="order-summary">
+        <div class="summary-box">
+          <div class="summary-title">Order Summary</div>
+
+          <div class="savings-pill" id="savingsPill" style="display:none">
+            <span>✦</span> <span id="savingsAmt">You save $0.00</span>
+          </div>
+
+          <div class="summary-line">
+            <span class="summary-label">Subtotal</span>
+            <span class="summary-val" id="subtotalVal">$0.00</span>
+          </div>
+          <div class="summary-line" id="discountRow" style="display:none">
+            <span class="summary-label">Ritual Discount</span>
+            <span class="summary-val green" id="discountVal">−$0.00</span>
+          </div>
+          <div class="summary-line">
+            <span class="summary-label">Shipping</span>
+            <span class="summary-val" id="shippingVal">Calculated at passage</span>
+          </div>
+          <div class="summary-line">
+            <span class="summary-label">Tax</span>
+            <span class="summary-val" id="taxVal">$0.00</span>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-total">
+            <span class="summary-total-label">Total</span>
+            <span class="summary-total-val" id="totalVal">$0.00</span>
+          </div>
+
+          <button class="checkout-btn" onclick="proceedCheckout()">
+            Proceed to Passage <span class="btn-arrow">→</span>
+          </button>
+
+          <div class="trust-row">
+            <div class="trust-badge"><span>🔒</span>Warded</div>
+            <div class="trust-badge"><span>↩</span>30-day return</div>
+            <div class="trust-badge"><span>✦</span>Verified</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-cart" id="emptyCart">
+      <div class="empty-glyph">◈</div>
+      <div class="empty-title">The void is empty</div>
+      <p class="empty-sub">You haven't added any artifacts to your bag yet.</p>
+      <a href="index.html">
+        <button class="promo-apply" style="font-size:0.72rem; padding:1rem 2.5rem; cursor:none;">
+          Return to the Shop
+        </button>
+      </a>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="recommendations" id="recommendations">
+      <div class="col-header" style="margin-top:0">You May Also Covet</div>
+      <div class="rec-grid" id="recGrid"></div>
+    </div>
+
+  </div>
+
+  <script>
+    // ── Data
+    let cart = [
+      { id:1, name:"Obsidian Shroud Cloak", category:"Wearables", price:288, icon:"🌑", size:"M", qty:1 },
+      { id:2, name:"Void Crystal Pendant", category:"Relics", price:144, icon:"◈", size:"One Size", qty:2 },
+      { id:3, name:"Shadow Veil Scarf", category:"Wearables", price:122, icon:"✦", size:"OS", qty:1 },
+    ];
+
+    const recs = [
+      { id:4, name:"Eclipse Sigil Ring", price:99, icon:"◎" },
+      { id:5, name:"Abyss Tome Clutch", price:177, icon:"⬟" },
+      { id:6, name:"Nebula Elixir No.3", price:55, icon:"🝭" },
+    ];
+
+    let promoApplied = false;
+    const PROMO_DISCOUNT = 0.20;
+    const FREE_SHIP_THRESHOLD = 200;
+
+    // ── Render Items
+    function renderCart() {
+      const container = document.getElementById('cartItems');
+      const emptyEl = document.getElementById('emptyCart');
+      const layoutEl = document.getElementById('cartLayout');
+      const recsEl = document.getElementById('recommendations');
+
+      if (cart.length === 0) {
+        layoutEl.style.display = 'none';
+        emptyEl.classList.add('show');
+        recsEl.style.opacity = '0.4';
+        document.getElementById('itemCountLabel').textContent = '0 artifacts';
+        return;
+      }
+
+      layoutEl.style.display = 'grid';
+      emptyEl.classList.remove('show');
+      document.getElementById('itemCountLabel').textContent =
+        `${cart.reduce((s,i)=>s+i.qty,0)} artifact${cart.reduce((s,i)=>s+i.qty,0)===1?'':'s'} awaiting retrieval`;
+
+      container.innerHTML = cart.map((item,idx) => `
+        <div class="cart-item" id="item-${idx}">
+          <div class="item-thumb">${item.icon}</div>
+          <div class="item-details">
+            <div class="item-category">${item.category}</div>
+            <div class="item-name">${item.name}</div>
+            <div class="item-meta">
+              ${item.size ? `<div class="item-meta-tag">Size <span>${item.size}</span></div>` : ''}
+              <div class="item-meta-tag">Unit <span>$${item.price}.00</span></div>
+            </div>
+            <div class="item-actions">
+              <button class="item-action-btn" onclick="moveToWishlist(${idx})">Save for Later</button>
+              <span class="item-action-sep">·</span>
+              <button class="item-action-btn" onclick="removeItem(${idx})">Remove</button>
+            </div>
+          </div>
+          <div class="item-right">
+            <div>
+              <div class="item-price">$${(item.price * item.qty).toFixed(2)}</div>
+              ${item.qty > 1 ? `<div class="item-price-each">$${item.price}.00 each</div>` : ''}
+            </div>
+            <div class="qty-control">
+              <button class="qty-btn" onclick="changeQty(${idx}, -1)">−</button>
+              <div class="qty-val">${item.qty}</div>
+              <button class="qty-btn" onclick="changeQty(${idx}, +1)">+</button>
+            </div>
+            <button class="item-remove" onclick="removeItem(${idx})" title="Remove">✕</button>
+          </div>
+        </div>
+      `).join('');
+
+      updateSummary();
+      updatePromoShipping();
+    }
+
+    function changeQty(idx, delta) {
+      cart[idx].qty = Math.max(1, cart[idx].qty + delta);
+      renderCart();
+    }
+
+    function removeItem(idx) {
+      const name = cart[idx].name;
+      cart.splice(idx, 1);
+      renderCart();
+      showNotification(`${name} returned to the void`);
+    }
+
+    function moveToWishlist(idx) {
+      const name = cart[idx].name;
+      cart.splice(idx, 1);
+      renderCart();
+      showNotification(`${name} saved for later`);
+    }
+
+    // ── Summary
+    function updateSummary() {
+      const subtotal = cart.reduce((s,i) => s + i.price * i.qty, 0);
+      const discount = promoApplied ? subtotal * PROMO_DISCOUNT : 0;
+      const discountedSub = subtotal - discount;
+      const tax = discountedSub * 0.08;
+      const shipping = discountedSub >= FREE_SHIP_THRESHOLD ? 0 : null;
+      const total = discountedSub + tax + (shipping || 0);
+
+      document.getElementById('subtotalVal').textContent = `$${subtotal.toFixed(2)}`;
+      document.getElementById('taxVal').textContent = `$${tax.toFixed(2)}`;
+      document.getElementById('totalVal').textContent = `$${total.toFixed(2)}`;
+
+      const discRow = document.getElementById('discountRow');
+      if (promoApplied) {
+        discRow.style.display = 'flex';
+        document.getElementById('discountVal').textContent = `−$${discount.toFixed(2)}`;
+        document.getElementById('savingsPill').style.display = 'inline-flex';
+        document.getElementById('savingsAmt').textContent = `You save $${discount.toFixed(2)}`;
+      } else {
+        discRow.style.display = 'none';
+        document.getElementById('savingsPill').style.display = 'none';
+      }
+
+      if (shipping === 0) {
+        document.getElementById('shippingVal').textContent = 'FREE';
+        document.getElementById('shippingVal').style.color = 'var(--green)';
+      } else {
+        document.getElementById('shippingVal').textContent = 'Calculated at passage';
+        document.getElementById('shippingVal').style.color = '';
+      }
+    }
+
+    function updatePromoShipping() {
+      const subtotal = cart.reduce((s,i) => s + i.price * i.qty, 0);
+      const left = FREE_SHIP_THRESHOLD - subtotal;
+      const el = document.getElementById('promoAmountLeft');
+      if (left <= 0) {
+        document.querySelector('.promo-banner').style.display = 'none';
+      } else {
+        document.querySelector('.promo-banner').style.display = 'flex';
+        el.textContent = `$${left.toFixed(2)}`;
+      }
+    }
+
+    // ── Promo
+    function applyPromo() {
+      const val = document.getElementById('promoInput').value.trim().toUpperCase();
+      if (val === 'ECLIPSE20' || val === 'VOID') {
+        promoApplied = true;
+        document.getElementById('promoSuccess').classList.add('show');
+        document.querySelector('.promo-input').style.borderColor = 'var(--green)';
+        updateSummary();
+        showNotification('Ritual code accepted');
+      } else {
+        document.querySelector('.promo-input').style.borderColor = 'var(--accent)';
+        showNotification('This sigil holds no power here');
+        setTimeout(() => {
+          document.querySelector('.promo-input').style.borderColor = '';
+        }, 2000);
+      }
+    }
+
+    // Allow enter key on promo
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('promoInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') applyPromo();
+      });
+    });
+
+    // ── Recommendations
+    function renderRecs() {
+      document.getElementById('recGrid').innerHTML = recs.map(r => `
+        <div class="rec-card">
+          <div class="rec-icon">${r.icon}</div>
+          <div class="rec-name">${r.name}</div>
+          <div class="rec-price">$${r.price}.00</div>
+          <button class="rec-add" onclick="addRec(${r.id})">+ Add to Bag</button>
+        </div>
+      `).join('');
+    }
+
+    function addRec(id) {
+      const rec = recs.find(r => r.id === id);
+      if (!rec) return;
+      const existing = cart.find(i => i.id === id);
+      if (existing) {
+        existing.qty++;
+      } else {
+        cart.push({ ...rec, qty: 1, size: 'One Size', category: 'Artifact' });
+      }
+      renderCart();
+      showNotification(`${rec.name} added to bag`);
+    }
+
+    function proceedCheckout() {
+      showNotification('Entering the passage...');
+    }
+
+    // ── Notification
+    function showNotification(msg) {
+      const el = document.getElementById('notification');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2400);
+    }
+
+    // ── Custom Cursor
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx=0, my=0, rx=0, ry=0;
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.transform = `translate(${mx-5}px,${my-5}px)`;
+    });
+    function animateRing() {
+      rx += (mx-rx-16)*0.12; ry += (my-ry-16)*0.12;
+      ring.style.transform = `translate(${rx}px,${ry}px)`;
+      requestAnimationFrame(animateRing);
+    }
+    animateRing();
+    document.querySelectorAll('button,a,.rec-card,.cart-item').forEach(el => {
+      el.addEventListener('mouseenter', () => { ring.style.width='46px'; ring.style.height='46px'; });
+      el.addEventListener('mouseleave', () => { ring.style.width='32px'; ring.style.height='32px'; });
+    });
+
+    // ── Init
+    renderCart();
+    renderRecs();
+  </script>
+</body>
+</html>
