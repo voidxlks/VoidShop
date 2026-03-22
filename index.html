@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VOID — Shop</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --void: #000000;
+      --abyss: #050508;
+      --deep: #0a0a12;
+      --surface: #0f0f1a;
+      --mist: #1a1a2e;
+      --glow: #7b5ea7;
+      --glow-bright: #a87fd4;
+      --glow-hot: #d4a7ff;
+      --accent: #ff6b9d;
+      --gold: #c9a84c;
+      --text: #d8d0e8;
+      --text-dim: #7a7090;
+      --text-faint: #3a3550;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--void);
+      color: var(--text);
+      font-family: 'Cormorant Garamond', serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom Cursor */
+    .cursor {
+      width: 12px; height: 12px;
+      background: var(--glow-hot);
+      border-radius: 50%;
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 10000;
+      transition: transform 0.1s ease;
+      mix-blend-mode: screen;
+    }
+    .cursor-ring {
+      width: 36px; height: 36px;
+      border: 1px solid var(--glow);
+      border-radius: 50%;
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.15s ease, width 0.3s, height 0.3s;
+      mix-blend-mode: screen;
+    }
+
+    /* Noise Overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9998;
+      opacity: 0.4;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.5rem 4rem;
+      border-bottom: 1px solid rgba(123,94,167,0.15);
+      background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 100%);
+      backdrop-filter: blur(4px);
+    }
+
+    .nav-logo {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1.4rem;
+      letter-spacing: 0.3em;
+      color: var(--glow-hot);
+      text-shadow: 0 0 30px rgba(212,167,255,0.6), 0 0 60px rgba(123,94,167,0.3);
+      animation: logoBreath 4s ease-in-out infinite;
+    }
+
+    @keyframes logoBreath {
+      0%, 100% { text-shadow: 0 0 20px rgba(212,167,255,0.5), 0 0 40px rgba(123,94,167,0.2); }
+      50% { text-shadow: 0 0 40px rgba(212,167,255,0.9), 0 0 80px rgba(123,94,167,0.5), 0 0 120px rgba(123,94,167,0.2); }
+    }
+
+    .nav-links {
+      display: flex; gap: 3rem; list-style: none;
+    }
+    .nav-links a {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.3s, text-shadow 0.3s;
+    }
+    .nav-links a:hover {
+      color: var(--glow-hot);
+      text-shadow: 0 0 20px rgba(212,167,255,0.5);
+    }
+
+    .nav-icons {
+      display: flex; gap: 1.5rem; align-items: center;
+    }
+    .nav-icons button {
+      background: none; border: none; color: var(--text-dim);
+      font-size: 1.1rem; cursor: none;
+      transition: color 0.3s, text-shadow 0.3s;
+    }
+    .nav-icons button:hover {
+      color: var(--glow-hot);
+      text-shadow: 0 0 15px rgba(212,167,255,0.6);
+    }
+    .cart-btn { position: relative; }
+    .cart-count {
+      position: absolute; top: -8px; right: -8px;
+      background: var(--accent);
+      color: white; font-family: 'Share Tech Mono', monospace;
+      font-size: 0.6rem; width: 16px; height: 16px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 8rem 2rem 4rem;
+    }
+
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 40%, rgba(123,94,167,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 20% 80%, rgba(255,107,157,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 80% 20%, rgba(201,168,76,0.04) 0%, transparent 60%);
+    }
+
+    /* Floating orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      animation: orbFloat linear infinite;
+      pointer-events: none;
+    }
+    .orb-1 { width: 300px; height: 300px; background: rgba(123,94,167,0.15); top: 10%; left: 5%; animation-duration: 20s; }
+    .orb-2 { width: 200px; height: 200px; background: rgba(255,107,157,0.1); top: 60%; right: 10%; animation-duration: 15s; animation-delay: -5s; }
+    .orb-3 { width: 150px; height: 150px; background: rgba(212,167,255,0.08); bottom: 20%; left: 20%; animation-duration: 25s; animation-delay: -10s; }
+
+    @keyframes orbFloat {
+      0% { transform: translateY(0) scale(1); }
+      33% { transform: translateY(-40px) scale(1.05); }
+      66% { transform: translateY(20px) scale(0.95); }
+      100% { transform: translateY(0) scale(1); }
+    }
+
+    /* Starfield */
+    .stars {
+      position: absolute; inset: 0; pointer-events: none;
+    }
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle ease-in-out infinite;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.1; }
+      50% { opacity: 0.8; }
+    }
+
+    .hero-tagline {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--glow);
+      margin-bottom: 2rem;
+      animation: fadeSlideUp 1s 0.2s both;
+    }
+
+    .hero-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(3.5rem, 9vw, 8rem);
+      font-weight: 900;
+      line-height: 1;
+      text-align: center;
+      background: linear-gradient(135deg, #fff 0%, var(--glow-hot) 40%, var(--glow) 70%, #fff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      margin-bottom: 0.3em;
+      animation: fadeSlideUp 1s 0.4s both;
+      position: relative;
+    }
+
+    .hero-subtitle {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1rem, 2.5vw, 1.8rem);
+      font-weight: 400;
+      letter-spacing: 0.5em;
+      color: var(--text-dim);
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeSlideUp 1s 0.6s both;
+    }
+
+    .hero-desc {
+      font-size: 1.1rem;
+      font-style: italic;
+      color: var(--text-dim);
+      max-width: 500px;
+      text-align: center;
+      line-height: 1.8;
+      margin-bottom: 3rem;
+      animation: fadeSlideUp 1s 0.8s both;
+    }
+
+    .hero-cta {
+      display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center;
+      animation: fadeSlideUp 1s 1s both;
+    }
+
+    .btn-primary {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--void);
+      background: linear-gradient(135deg, var(--glow-hot), var(--glow));
+      border: none;
+      padding: 1rem 2.5rem;
+      cursor: none;
+      transition: transform 0.3s, box-shadow 0.3s;
+      clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 40px rgba(212,167,255,0.4);
+    }
+
+    .btn-ghost {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--glow-hot);
+      background: transparent;
+      border: 1px solid rgba(212,167,255,0.3);
+      padding: 1rem 2.5rem;
+      cursor: none;
+      transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+      clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    }
+    .btn-ghost:hover {
+      border-color: var(--glow-hot);
+      background: rgba(212,167,255,0.05);
+      box-shadow: 0 0 30px rgba(212,167,255,0.15);
+    }
+
+    .scroll-indicator {
+      position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      animation: fadeSlideUp 1s 1.5s both;
+    }
+    .scroll-indicator span {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 0.3em; color: var(--text-faint);
+    }
+    .scroll-line {
+      width: 1px; height: 50px;
+      background: linear-gradient(to bottom, var(--glow), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.3; transform: scaleY(1); }
+      50% { opacity: 1; transform: scaleY(1.1); }
+    }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── MARQUEE ── */
+    .marquee-section {
+      border-top: 1px solid rgba(123,94,167,0.15);
+      border-bottom: 1px solid rgba(123,94,167,0.15);
+      padding: 1rem 0;
+      overflow: hidden;
+      background: rgba(123,94,167,0.04);
+    }
+    .marquee-track {
+      display: flex; gap: 4rem;
+      animation: marquee 20s linear infinite;
+      white-space: nowrap;
+    }
+    .marquee-item {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      color: var(--text-faint);
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .marquee-item span { color: var(--glow); margin: 0 1rem; }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* ── FEATURED / PRODUCTS ── */
+    .section {
+      padding: 6rem 4rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      display: flex; align-items: baseline; gap: 2rem;
+      margin-bottom: 4rem;
+    }
+    .section-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      color: white;
+      letter-spacing: 0.1em;
+    }
+    .section-line {
+      flex: 1; height: 1px;
+      background: linear-gradient(to right, rgba(123,94,167,0.5), transparent);
+    }
+    .section-count {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem; letter-spacing: 0.2em; color: var(--text-faint);
+    }
+
+    /* Product Grid */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .product-card {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid rgba(123,94,167,0.12);
+      overflow: hidden;
+      cursor: none;
+      transition: border-color 0.4s, transform 0.4s;
+      group: true;
+    }
+    .product-card:hover {
+      border-color: rgba(212,167,255,0.35);
+      transform: translateY(-4px);
+    }
+    .product-card:hover .product-overlay { opacity: 1; }
+    .product-card:hover .product-img-wrap img { transform: scale(1.06); }
+    .product-card:hover .quick-add { transform: translateY(0); opacity: 1; }
+
+    .product-badge {
+      position: absolute; top: 1rem; left: 1rem; z-index: 2;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase;
+      padding: 0.3rem 0.8rem;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+    }
+    .badge-new { border: 1px solid var(--glow); color: var(--glow-hot); }
+    .badge-sold { border: 1px solid rgba(255,107,157,0.4); color: var(--accent); }
+    .badge-rare { border: 1px solid rgba(201,168,76,0.4); color: var(--gold); }
+
+    .product-img-wrap {
+      aspect-ratio: 3/4;
+      overflow: hidden;
+      background: var(--deep);
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .product-img-wrap img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      filter: brightness(0.85) contrast(1.05);
+    }
+
+    /* Placeholder product visuals */
+    .product-placeholder {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem;
+      position: relative;
+    }
+
+    .product-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .quick-add {
+      position: absolute; bottom: 1rem; left: 1rem; right: 1rem; z-index: 3;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+      padding: 0.8rem;
+      background: rgba(212,167,255,0.15);
+      border: 1px solid rgba(212,167,255,0.4);
+      color: var(--glow-hot);
+      backdrop-filter: blur(8px);
+      cursor: none;
+      transform: translateY(10px); opacity: 0;
+      transition: transform 0.3s, opacity 0.3s, background 0.3s;
+      text-align: center;
+    }
+    .quick-add:hover { background: rgba(212,167,255,0.25); }
+
+    .product-info { padding: 1.2rem; }
+    .product-category {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--glow); margin-bottom: 0.4rem;
+    }
+    .product-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem; font-weight: 500;
+      color: var(--text); margin-bottom: 0.8rem;
+      line-height: 1.3;
+    }
+    .product-footer {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .product-price {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.9rem; color: var(--glow-hot);
+    }
+    .product-price.sold { color: var(--text-faint); text-decoration: line-through; }
+    .wishlist-btn {
+      background: none; border: none; color: var(--text-faint);
+      font-size: 1rem; cursor: none;
+      transition: color 0.3s, transform 0.2s;
+    }
+    .wishlist-btn:hover { color: var(--accent); transform: scale(1.2); }
+    .wishlist-btn.active { color: var(--accent); }
+
+    /* ── DIVIDER ── */
+    .void-divider {
+      text-align: center; padding: 3rem;
+      position: relative;
+    }
+    .void-divider::before, .void-divider::after {
+      content: '';
+      position: absolute; top: 50%;
+      width: 30%; height: 1px;
+      background: linear-gradient(to right, transparent, rgba(123,94,167,0.3));
+    }
+    .void-divider::before { left: 5%; }
+    .void-divider::after { right: 5%; transform: scaleX(-1); }
+    .void-divider-symbol {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1.5rem;
+      color: var(--glow);
+      text-shadow: 0 0 20px rgba(123,94,167,0.5);
+    }
+
+    /* ── BANNER ── */
+    .banner {
+      margin: 0 4rem;
+      border: 1px solid rgba(123,94,167,0.2);
+      background: linear-gradient(135deg, var(--deep) 0%, var(--mist) 50%, var(--deep) 100%);
+      padding: 5rem;
+      position: relative; overflow: hidden;
+      text-align: center;
+    }
+    .banner::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 70% 70% at 50% 50%, rgba(123,94,167,0.12) 0%, transparent 70%);
+    }
+    .banner-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 0.4em; text-transform: uppercase;
+      color: var(--glow); margin-bottom: 1.5rem;
+    }
+    .banner-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(2rem, 5vw, 4rem);
+      color: white; margin-bottom: 1rem;
+      line-height: 1.1;
+    }
+    .banner-title em { color: var(--glow-hot); font-style: normal; }
+    .banner-text {
+      font-size: 1.1rem; font-style: italic;
+      color: var(--text-dim); max-width: 500px; margin: 0 auto 2.5rem;
+      line-height: 1.8;
+    }
+
+    /* ── CATEGORIES ── */
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: rgba(123,94,167,0.1);
+    }
+    .category-card {
+      aspect-ratio: 1;
+      position: relative; overflow: hidden;
+      cursor: none;
+      background: var(--abyss);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      transition: background 0.4s;
+    }
+    .category-card:hover { background: var(--surface); }
+    .category-card:hover .cat-icon { transform: scale(1.1); filter: brightness(1.3); }
+    .category-card:hover .cat-bg { opacity: 1; }
+    .cat-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(123,94,167,0.1) 0%, transparent 70%);
+      opacity: 0; transition: opacity 0.4s;
+    }
+    .cat-icon {
+      font-size: 3rem; margin-bottom: 1rem;
+      transition: transform 0.4s, filter 0.4s;
+      position: relative; z-index: 1;
+    }
+    .cat-label {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 0.8rem; letter-spacing: 0.15em;
+      color: var(--text); text-transform: uppercase;
+      position: relative; z-index: 1;
+    }
+    .cat-count {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.6rem; color: var(--text-faint); margin-top: 0.3rem;
+      position: relative; z-index: 1;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      margin-top: 6rem;
+      border-top: 1px solid rgba(123,94,167,0.15);
+      padding: 4rem;
+      background: var(--abyss);
+    }
+    .footer-grid {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 3rem; max-width: 1400px; margin: 0 auto 3rem;
+    }
+    .footer-brand .nav-logo { display: block; margin-bottom: 1rem; font-size: 1rem; }
+    .footer-brand p {
+      font-size: 0.9rem; font-style: italic;
+      color: var(--text-faint); line-height: 1.8; max-width: 280px;
+    }
+    .footer-col h4 {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--glow); margin-bottom: 1.5rem;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 0.8rem; }
+    .footer-col ul li a {
+      font-size: 0.9rem; color: var(--text-faint); text-decoration: none;
+      transition: color 0.3s; font-style: italic;
+    }
+    .footer-col ul li a:hover { color: var(--glow-hot); }
+    .footer-bottom {
+      border-top: 1px solid rgba(123,94,167,0.1);
+      padding-top: 2rem; max-width: 1400px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer-bottom p {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 0.2em; color: var(--text-faint);
+    }
+
+    /* ── CART SIDEBAR ── */
+    .cart-sidebar {
+      position: fixed; top: 0; right: -420px; bottom: 0; width: 420px;
+      background: var(--abyss);
+      border-left: 1px solid rgba(123,94,167,0.2);
+      z-index: 2000;
+      transition: right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      display: flex; flex-direction: column;
+    }
+    .cart-sidebar.open { right: 0; }
+    .cart-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+      z-index: 1999; opacity: 0; pointer-events: none;
+      transition: opacity 0.4s; backdrop-filter: blur(4px);
+    }
+    .cart-overlay.open { opacity: 1; pointer-events: all; }
+    .cart-header {
+      padding: 2rem; border-bottom: 1px solid rgba(123,94,167,0.15);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .cart-header h3 {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1rem; letter-spacing: 0.15em;
+    }
+    .cart-close {
+      background: none; border: none; color: var(--text-dim);
+      font-size: 1.2rem; cursor: none;
+    }
+    .cart-empty {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 1rem;
+      color: var(--text-faint);
+    }
+    .cart-empty-icon { font-size: 3rem; opacity: 0.3; }
+    .cart-empty p { font-style: italic; font-size: 0.95rem; }
+    .cart-items { flex: 1; overflow-y: auto; padding: 1.5rem; }
+    .cart-item {
+      display: flex; gap: 1rem; align-items: center;
+      padding: 1rem 0; border-bottom: 1px solid rgba(123,94,167,0.1);
+    }
+    .cart-item-icon { font-size: 2rem; width: 60px; text-align: center; }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-size: 0.9rem; color: var(--text); margin-bottom: 0.3rem; }
+    .cart-item-price {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem; color: var(--glow-hot);
+    }
+    .cart-item-remove {
+      background: none; border: none; color: var(--text-faint);
+      cursor: none; font-size: 0.9rem;
+      transition: color 0.3s;
+    }
+    .cart-item-remove:hover { color: var(--accent); }
+    .cart-footer {
+      padding: 1.5rem; border-top: 1px solid rgba(123,94,167,0.15);
+    }
+    .cart-total {
+      display: flex; justify-content: space-between; margin-bottom: 1.5rem;
+      font-family: 'Cinzel Decorative', serif; font-size: 0.9rem;
+    }
+    .cart-total span:last-child { color: var(--glow-hot); }
+    .checkout-btn {
+      width: 100%;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--void);
+      background: linear-gradient(135deg, var(--glow-hot), var(--glow));
+      border: none; padding: 1.2rem; cursor: none;
+      transition: opacity 0.3s;
+    }
+    .checkout-btn:hover { opacity: 0.85; }
+
+    /* ── NOTIFICATION ── */
+    .notification {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px);
+      background: var(--surface);
+      border: 1px solid rgba(212,167,255,0.3);
+      color: var(--glow-hot);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem; letter-spacing: 0.2em;
+      padding: 1rem 2rem;
+      z-index: 5000;
+      transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      text-transform: uppercase;
+    }
+    .notification.show { transform: translateX(-50%) translateY(0); }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      nav { padding: 1.5rem 2rem; }
+      .nav-links { display: none; }
+      .section { padding: 4rem 2rem; }
+      .banner { margin: 0 2rem; padding: 3rem 2rem; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .categories-grid { grid-template-columns: repeat(2, 1fr); }
+      .cart-sidebar { width: 100%; right: -100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Custom Cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- Cart Overlay -->
+  <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+
+  <!-- Cart Sidebar -->
+  <div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h3>Your Void Bag</h3>
+      <button class="cart-close" onclick="toggleCart()">✕</button>
+    </div>
+    <div id="cartContent">
+      <div class="cart-empty">
+        <div class="cart-empty-icon">◈</div>
+        <p>The void is empty...</p>
+      </div>
+    </div>
+    <div class="cart-footer" id="cartFooter" style="display:none;">
+      <div class="cart-total">
+        <span>Total</span>
+        <span id="cartTotal">$0.00</span>
+      </div>
+      <button class="checkout-btn">Enter the Void — Checkout</button>
+    </div>
+  </div>
+
+  <!-- Notification -->
+  <div class="notification" id="notification"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">VOID</div>
+    <ul class="nav-links">
+      <li><a href="#products">Shop</a></li>
+      <li><a href="#categories">Realms</a></li>
+      <li><a href="#">Collections</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+    <div class="nav-icons">
+      <button>⌕</button>
+      <button>◎</button>
+      <button class="cart-btn" onclick="toggleCart()">
+        ◈
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="stars" id="stars"></div>
+
+    <p class="hero-tagline">◆ Artifacts from beyond ◆</p>
+    <h1 class="hero-title">VOIDSHOP</h1>
+    <p class="hero-subtitle">Where Darkness Meets Desire</p>
+    <p class="hero-desc">Curated relics, arcane wearables, and objects pulled from the space between worlds.</p>
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="scrollToProducts()">Enter the Shop</button>
+      <button class="btn-ghost">View Collections</button>
+    </div>
+    <div class="scroll-indicator">
+      <div class="scroll-line"></div>
+      <span>Scroll to descend</span>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-section">
+    <div class="marquee-track" id="marqueeTrack"></div>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div class="section" id="products">
+    <div class="section-header">
+      <h2 class="section-title">New Arrivals</h2>
+      <div class="section-line"></div>
+      <span class="section-count">12 items</span>
+    </div>
+    <div class="products-grid" id="productsGrid"></div>
+  </div>
+
+  <!-- DIVIDER -->
+  <div class="void-divider">
+    <span class="void-divider-symbol">⬟</span>
+  </div>
+
+  <!-- BANNER -->
+  <div class="banner">
+    <p class="banner-label">Limited Offering — 72 Hours Only</p>
+    <h2 class="banner-title">The <em>Eclipse</em> Drop</h2>
+    <p class="banner-text">Twelve pieces. One chance. When the void closes, these artifacts return to darkness forever.</p>
+    <button class="btn-primary">Claim Your Relic</button>
+  </div>
+
+  <!-- CATEGORIES -->
+  <div class="section" id="categories" style="padding-top: 5rem;">
+    <div class="section-header">
+      <h2 class="section-title">Browse Realms</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="categories-grid">
+      <div class="category-card">
+        <div class="cat-bg"></div>
+        <div class="cat-icon">🝭</div>
+        <div class="cat-label">Wearables</div>
+        <div class="cat-count">48 items</div>
+      </div>
+      <div class="category-card">
+        <div class="cat-bg"></div>
+        <div class="cat-icon">◉</div>
+        <div class="cat-label">Relics</div>
+        <div class="cat-count">23 items</div>
+      </div>
+      <div class="category-card">
+        <div class="cat-bg"></div>
+        <div class="cat-icon">⬡</div>
+        <div class="cat-label">Sigils</div>
+        <div class="cat-count">31 items</div>
+      </div>
+      <div class="category-card">
+        <div class="cat-bg"></div>
+        <div class="cat-icon">🜃</div>
+        <div class="cat-label">Elixirs</div>
+        <div class="cat-count">15 items</div>
+      </div>
+      <div class="category-card">
+        <div class="cat-bg"></div>
+        <div class="cat-icon">⧖</div>
+        <div class="cat-label">Arcana</div>
+        <div class="cat-count">9 items</div>
+      </div>
+      <div class="category-card">
+        <div class="cat-bg"></div>
+        <div class="cat-icon">✦</div>
+        <div class="cat-label">Limited</div>
+        <div class="cat-count">6 items</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <span class="nav-logo">VOID</span>
+        <p>We source what others dare not touch. Every piece carries a history older than memory, a weight heavier than shadow.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="#">Shop All</a></li>
+          <li><a href="#">New Arrivals</a></li>
+          <li><a href="#">Collections</a></li>
+          <li><a href="#">Limited Drops</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Commune</h4>
+        <ul>
+          <li><a href="#">Our Lore</a></li>
+          <li><a href="#">The Ritual</a></li>
+          <li><a href="#">Dispatches</a></li>
+          <li><a href="#">Consign</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Passage</h4>
+        <ul>
+          <li><a href="#">Shipping & Returns</a></li>
+          <li><a href="#">Care Instructions</a></li>
+          <li><a href="#">Size Oracle</a></li>
+          <li><a href="#">Contact the Void</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 VOIDSHOP — All artifacts reserved</p>
+      <p>Made in the Between-Space</p>
+    </div>
+  </footer>
+
+  <script>
+    // ── Products Data
+    const products = [
+      { id:1, name:"Obsidian Shroud Cloak", category:"Wearables", price:288, icon:"🌑", badge:"new", sold:false },
+      { id:2, name:"Void Crystal Pendant", category:"Relics", price:144, icon:"◈", badge:"rare", sold:false },
+      { id:3, name:"Abyss Walker Boots", category:"Wearables", price:333, icon:"⬟", badge:null, sold:false },
+      { id:4, name:"Eclipse Sigil Ring", category:"Sigils", price:99, icon:"◎", badge:"sold", sold:true },
+      { id:5, name:"Nebula Dye Wrap", category:"Wearables", price:178, icon:"🌌", badge:"new", sold:false },
+      { id:6, name:"Phantasm Elixir No.7", category:"Elixirs", price:66, icon:"🝭", badge:null, sold:false },
+      { id:7, name:"Void Mirror Compact", category:"Relics", price:211, icon:"⬡", badge:"rare", sold:false },
+      { id:8, name:"Shadow Veil Scarf", category:"Wearables", price:122, icon:"✦", badge:null, sold:false },
+    ];
+
+    let cart = [];
+
+    function getBadgeHtml(badge) {
+      if (!badge) return '';
+      const cls = { new:'badge-new', sold:'badge-sold', rare:'badge-rare' }[badge];
+      return `<div class="product-badge ${cls}">${badge}</div>`;
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById('productsGrid');
+      grid.innerHTML = products.map(p => `
+        <div class="product-card" data-id="${p.id}">
+          ${getBadgeHtml(p.badge)}
+          <div class="product-img-wrap">
+            <div class="product-placeholder" style="background: linear-gradient(135deg, #0a0a12, #1a1a2e);">
+              <span style="filter: drop-shadow(0 0 20px rgba(212,167,255,0.4))">${p.icon}</span>
+            </div>
+            <div class="product-overlay"></div>
+            ${!p.sold ? `<button class="quick-add" onclick="addToCart(${p.id})">+ Add to Bag</button>` : '<div class="quick-add" style="color:var(--text-faint);border-color:rgba(255,255,255,0.1)">Returned to Void</div>'}
+          </div>
+          <div class="product-info">
+            <div class="product-category">${p.category}</div>
+            <div class="product-name">${p.name}</div>
+            <div class="product-footer">
+              <span class="product-price${p.sold?' sold':''}">$${p.price}.00</span>
+              <button class="wishlist-btn" onclick="toggleWishlist(this)" title="Wish">♡</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function addToCart(id) {
+      const product = products.find(p => p.id === id);
+      if (!product || product.sold) return;
+      cart.push(product);
+      updateCartUI();
+      showNotification(`${product.name} added to bag`);
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCartUI();
+    }
+
+    function toggleWishlist(btn) {
+      btn.classList.toggle('active');
+      btn.textContent = btn.classList.contains('active') ? '♥' : '♡';
+    }
+
+    function updateCartUI() {
+      const count = cart.length;
+      document.getElementById('cartCount').textContent = count;
+
+      const content = document.getElementById('cartContent');
+      const footer = document.getElementById('cartFooter');
+
+      if (count === 0) {
+        content.innerHTML = `<div class="cart-empty"><div class="cart-empty-icon">◈</div><p>The void is empty...</p></div>`;
+        footer.style.display = 'none';
+      } else {
+        const total = cart.reduce((s,p) => s + p.price, 0);
+        content.innerHTML = `<div class="cart-items">${cart.map((p,i) => `
+          <div class="cart-item">
+            <div class="cart-item-icon">${p.icon}</div>
+            <div class="cart-item-info">
+              <div class="cart-item-name">${p.name}</div>
+              <div class="cart-item-price">$${p.price}.00</div>
+            </div>
+            <button class="cart-item-remove" onclick="removeFromCart(${i})">✕</button>
+          </div>
+        `).join('')}</div>`;
+        document.getElementById('cartTotal').textContent = `$${total}.00`;
+        footer.style.display = 'block';
+      }
+    }
+
+    function toggleCart() {
+      document.getElementById('cartSidebar').classList.toggle('open');
+      document.getElementById('cartOverlay').classList.toggle('open');
+    }
+
+    function showNotification(msg) {
+      const el = document.getElementById('notification');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2500);
+    }
+
+    function scrollToProducts() {
+      document.getElementById('products').scrollIntoView({ behavior:'smooth' });
+    }
+
+    // ── Stars
+    function buildStars() {
+      const container = document.getElementById('stars');
+      for (let i = 0; i < 80; i++) {
+        const s = document.createElement('div');
+        s.className = 'star';
+        const size = Math.random() * 2 + 0.5;
+        s.style.cssText = `
+          width:${size}px; height:${size}px;
+          top:${Math.random()*100}%; left:${Math.random()*100}%;
+          animation-duration:${2+Math.random()*4}s;
+          animation-delay:${Math.random()*4}s;
+        `;
+        container.appendChild(s);
+      }
+    }
+
+    // ── Marquee
+    function buildMarquee() {
+      const items = ['Free Shipping Over $200','New Moon Drop — Every Month','◆','Handcrafted Relics','◆','Arcane Wearables','◆','Ships in Warded Packaging','◆','Void Rewards Program','◆'];
+      const track = document.getElementById('marqueeTrack');
+      const doubled = [...items, ...items];
+      track.innerHTML = doubled.map(item =>
+        item === '◆' ? `<span class="marquee-item"><span>◆</span></span>` : `<span class="marquee-item">${item}</span>`
+      ).join('');
+    }
+
+    // ── Custom Cursor
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.transform = `translate(${mx-6}px, ${my-6}px)`;
+    });
+
+    function animateRing() {
+      rx += (mx - rx - 18) * 0.12;
+      ry += (my - ry - 18) * 0.12;
+      ring.style.transform = `translate(${rx}px, ${ry}px)`;
+      requestAnimationFrame(animateRing);
+    }
+    animateRing();
+
+    document.querySelectorAll('button, a, .product-card').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.style.transform += ' scale(1.5)';
+        ring.style.width = '50px'; ring.style.height = '50px';
+      });
+      el.addEventListener('mouseleave', () => {
+        ring.style.width = '36px'; ring.style.height = '36px';
+      });
+    });
+
+    // ── Init
+    buildStars();
+    buildMarquee();
+    renderProducts();
+  </script>
+</body>
+</html>
